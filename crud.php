@@ -1,67 +1,107 @@
 <?php
-// Aula 10
-// conexão
-$connection = new mysqli('localhost', 'root', '', 'cadastro');
 
-// Verifica se existe erro de conexão, se existir, termina e mostra a mensagem de erro
-if ($connection->connect_error) {
-  exit("Erro: {$connection->connect_error}");
+$nome = isset($_POST['nome']) ? $_POST['nome'] : '';
+$email = isset($_POST['email']) ? $_POST['email'] : '';
+$cidade = isset($_POST['cidade']) ? $_POST['cidade'] : '';
+$estado = isset($_POST['estado']) ? $_POST['estado'] : '';
+$stmt = '';
+$connection = new mysqli('localhost', 'root', '', 'cadastro');
+$resultado = '';
+
+function abrirConexao($connection)
+{
+  // conexão
+  // Verifica se existe erro de conexão, se existir, termina e mostra a mensagem de erro
+  if ($connection->connect_error) {
+    exit("Erro: {$connection->connect_error}");
+  }
+  return $connection;
+}
+
+// Fechar as conexões
+function fecharConexao($stmt, $connection)
+{
+  if (gettype($stmt) == 'string') {
+    $connection->close();
+  } else {
+    $connection->close();
+    $stmt->close();
+  }
 }
 
 // Delete
-function delete($connection)
+function delete($connection, $nome)
 {
-  $sql = "delete from clientes where nome = 'Ana Paula'";
-  $connection->query($sql);
+  $sql = "delete from clientes where nome = ? ";
+  abrirConexao($connection)->query($sql);
+  $stmt = $connection->prepare($sql);
+  $stmt->bind_param('s', $nome);
+  $stmt->execute();
 }
 
 // Atualizar
-function atualizar($connection, $nome)
+function atualizar($connection, $nome, $email)
 {
-  $sql = "update clientes set nome = 'Fernando da Silva' where id='1'";
-  $connection->query($sql);
+  $sql = "update clientes set email = ? where nome = ? ";
+  abrirConexao($connection)->query($sql);
+  $stmt = $connection->prepare($sql);
+  $stmt->bind_param('ss', $email, $nome);
+  $stmt->execute();
 }
-
 
 // Inserir
 function inserir($connection, $nome, $email, $cidade, $estado)
 {
-
   $sql = "insert into clientes(nome, email, cidade, estado)
-  values('Ana Paula', 'ana@gmail.com', 'Jandira', 'SP')";
-  $connection->query($sql);
+  values(?, ?, ?, ?)";
+  abrirConexao($connection)->query($sql);
+  $stmt = $connection->prepare($sql);
+  $stmt->bind_param('ssss', $nome, $email, $cidade, $estado);
+  $stmt->execute();
 }
 
 
 // Ler
-function ler($connection, $nome, $email, $cidade, $estado)
-{
-
-  $sql = "select * from clientes where nome = ? ";
-  // prepara para string para a conexão
-  $stmt = $connection->prepare($sql);
-  $stmt->bind_param('s', $nome);
-  $stmt->execute();
-  // traz o resultado como objeto
-  $result = $stmt->get_result()->fetch_object();
-  if ($result) {
-    echo '<pre>';
-    var_dump($result);
-    echo '<pre>';
+function ler($connection, $stmt)
+{;
+  $tabela = '';
+  $sql = "select * from clientes";
+  // Fazendo uma query
+  $results = abrirConexao($connection)->query($sql);
+  // Verificar se existe algum registro na tabela (linha).
+  if ($results->num_rows) {
+    while ($cliente = $results->fetch_object()) {
+      $tabela .= "<tr><td>{$cliente->id}</td>
+                  <td>{$cliente->nome}</td>
+                  <td>{$cliente->email}</td>
+                  <td>{$cliente->cidade}</td>
+                  <td>{$cliente->estado}</td></tr>";
+    }
   } else {
-    echo 'Cliente não encontrado';
+    $tabela = "Nenhum cliente encontrado";
   }
+  return $tabela;
 }
-// Fechar as conexões
-$stmt->close();
-$connection->close();
+
+// validação
 
 
-//botão salvar 
+
+// botão salvar 
 if (isset($_POST['salvar'])) {
-}
-// Exibe tabela
+  inserir($connection, $nome, $email, $cidade, $estado);
+};
 
-// $result .= "<tr>
-//                 <td>{$}</td>
-//             <tr>"
+// botão deletar 
+if (isset($_POST['deletar'])) {
+  delete($connection, $nome);
+};
+
+// botão atualizar
+if (isset($_POST['editar'])) {
+  atualizar($connection, $nome, $email);
+}
+
+
+$resultado = ler($connection, $stmt);
+fecharConexao($stmt, $connection);

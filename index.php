@@ -1,3 +1,4 @@
+<?php include './crud.php' ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -41,14 +42,23 @@
         </div>
       </div>
       <div class="row">
-        <button class="waves-effect waves-light btn" name=""><i class="material-icons right">save</i>Salvar</button>
-        <button class="waves-effect waves-light btn amber"><i class="material-icons right">edit</i>Editar</button>
-        <button class="waves-effect waves-light btn red darken-1"><i class="material-icons right">delete</i>Deletar</button>
+        <button class="waves-effect waves-light btn" name="salvar"><i class="material-icons right">save</i>Salvar</button>
+        <button class="waves-effect waves-light btn amber" name="editar"><i class="material-icons right">edit</i>Editar</button>
+        <button class="waves-effect waves-light btn red darken-1" name="deletar"><i class="material-icons right">delete</i>Deletar</button>
       </div>
     </form>
 
     <div>
-      <?php echo $table; ?>
+      <table class="striped">
+        <thead>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>E-mail</th>
+          <th>Cidade</th>
+          <th>Estado</th>
+        </thead>
+        <?php echo $resultado ?>
+      </table>
     </div>
   </main>
 </body>
