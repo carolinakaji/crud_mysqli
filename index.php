@@ -50,7 +50,7 @@
 
     <div>
       <table class="striped">
-        <thead>
+        <thead class="grey lighten-1">
           <th>ID</th>
           <th>Nome</th>
           <th>E-mail</th>
